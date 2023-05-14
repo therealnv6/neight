@@ -19,6 +19,8 @@ namespace low
             // map known opcodes to their corresponding handlers
             opcode_table[0x0][0x0] = &cpu::opcode_0x00e0;
             opcode_table[0x0][0xE] = &cpu::opcode_0x00ee;
+            opcode_table[0x1][0x1] = &cpu::opcode_0x1nnn;
+            opcode_table[0x2][0x2] = &cpu::opcode_0x2nnn;
         }
 
         void handle_opcode(unsigned short opcode)
@@ -43,5 +45,8 @@ namespace low
 
         void opcode_0x00e0(uint16_t);
         void opcode_0x00ee(uint16_t);
+        void opcode_0x1nnn(uint16_t);
+        void opcode_0x2nnn(uint16_t);
+        void opcode_0x3xkk(uint16_t);
     };
 }
