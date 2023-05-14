@@ -17,6 +17,17 @@ namespace low
             }
 
             // map known opcodes to their corresponding handlers
+            opcode_table[0x0][0x0] = &cpu::opcode_0x00e0;
+            opcode_table[0x0][0xE] = &cpu::opcode_0x00ee;
+        }
+
+        void handle_opcode(unsigned short opcode)
+        {
+            unsigned char high_byte = (opcode >> 8) & 0xFF;
+            unsigned char low_byte = opcode & 0xFF;
+
+            auto opcode_handler = opcode_table[high_byte >> 4][low_byte >> 4];
+            (this->*opcode_handler)(opcode);
         }
 
     private:
@@ -29,5 +40,8 @@ namespace low
         {
             spdlog::warn("unknown opcode! {}", opcode);
         }
+
+        void opcode_0x00e0(uint16_t);
+        void opcode_0x00ee(uint16_t);
     };
 }
