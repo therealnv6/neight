@@ -2,7 +2,7 @@
 
 #include <array>
 
-namespace emu
+namespace low
 {
     typedef std::array<unsigned char, 4096> memory_alloc;
 
