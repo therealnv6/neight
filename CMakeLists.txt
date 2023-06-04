@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(chimp)
+project(meowfu)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_BUILD_TYPE Debug)
@@ -9,12 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Vulkan REQUIRED)
 find_package(spdlog REQUIRED)
-
-add_subdirectory(thirdparty/glfw)
-add_subdirectory(thirdparty/vma)
-
 find_program(MOLD_LINKER_EXE mold)
 
 if(MOLD_LINKER_EXE)
@@ -33,8 +28,17 @@ file(GLOB_RECURSE SOURCES
     ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
+set(SOURCES 
+  ${SOURCES} 
+)
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    include
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     spdlog::spdlog
