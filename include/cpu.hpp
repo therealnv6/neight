@@ -27,6 +27,9 @@ static const uint8_t FONT_SET[80] = {
 	0xF0, 0x80, 0xF0, 0x80, 0x80 // F
 };
 
+constexpr int SIZE_X = 64;
+constexpr int SIZE_Y = 32;
+
 namespace low
 {
 
@@ -40,14 +43,32 @@ namespace low
 		uint8_t V[16];
 		uint16_t index;
 		uint16_t pc;
-		uint8_t gfx[64 * 32]; // (64x32 pixels)
+		uint8_t gfx[SIZE_X * SIZE_Y]; // (64x32 pixels)
 		uint8_t delay_timer;
 		uint8_t sound_timer;
 		uint16_t stack[16];
 		uint16_t sp;
 		uint8_t key[16];
 
-		std::map<uint16_t, callback> opcodes;
+		// std::map<uint16_t, callback> opcodes;
+		callback opcodes[16][16] = {
+			{&cpu::op_00E0,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x0...
+			{&cpu::op_1nnn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x1...
+			{&cpu::op_2nnn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x2...
+			{&cpu::op_3xkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x3...
+			{&cpu::op_4xkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x4...
+			{&cpu::op_5xy0,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x5...
+			{&cpu::op_6xkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x6...
+			{&cpu::op_7xkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x7...
+			{&cpu::op_8xy0, &cpu::op_8xy1, &cpu::op_8xy2, &cpu::op_8xy3, &cpu::op_8xy4, &cpu::op_8xy5, &cpu::op_8xy6, &cpu::op_8xy7, &cpu::op_8xyE,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x8...
+			{&cpu::op_9xy0,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x9...
+			{&cpu::op_Annn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xA...
+			{&cpu::op_Bnnn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xB...
+			{&cpu::op_Cxkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xC...
+			{&cpu::op_Dxyn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xD...
+			{&cpu::op_Ex9E,		 nullptr, &cpu::op_ExA1,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xE...
+			{&cpu::op_Fx07,		 nullptr, &cpu::op_Fx0A,		 nullptr, &cpu::op_Fx15, &cpu::op_Fx18, &cpu::op_Fx1E, &cpu::op_Fx29, &cpu::op_Fx33, &cpu::op_Fx55, &cpu::op_Fx65, nullptr, nullptr, nullptr, nullptr, nullptr}	 // Opcode 0xF...
+		};
 
 	public:
 		cpu()
@@ -66,42 +87,6 @@ namespace low
 			{
 				memory[i] = FONT_SET[i];
 			}
-
-			opcodes[0x0000] = &low::cpu::op_00E0;
-			opcodes[0x000E] = &low::cpu::op_00EE;
-			opcodes[0x1000] = &low::cpu::op_1nnn;
-			opcodes[0x2000] = &low::cpu::op_2nnn;
-			opcodes[0x3000] = &low::cpu::op_3xkk;
-			opcodes[0x4000] = &low::cpu::op_4xkk;
-			opcodes[0x5000] = &low::cpu::op_5xy0;
-			opcodes[0x6000] = &low::cpu::op_6xkk;
-			opcodes[0x7000] = &low::cpu::op_7xkk;
-			opcodes[0x8000] = &low::cpu::op_8xy0;
-			opcodes[0x8001] = &low::cpu::op_8xy1;
-			opcodes[0x8002] = &low::cpu::op_8xy2;
-			opcodes[0x8003] = &low::cpu::op_8xy3;
-			opcodes[0x8004] = &low::cpu::op_8xy4;
-			opcodes[0x8005] = &low::cpu::op_8xy5;
-			opcodes[0x8006] = &low::cpu::op_8xy6;
-			opcodes[0x8007] = &low::cpu::op_8xy7;
-			opcodes[0x800E] = &low::cpu::op_8xyE;
-			opcodes[0x9000] = &low::cpu::op_9xy0;
-			opcodes[0xA000] = &low::cpu::op_Annn;
-			opcodes[0xB000] = &low::cpu::op_Bnnn;
-			opcodes[0xC000] = &low::cpu::op_Cxkk;
-			opcodes[0xD000] = &low::cpu::op_Dxyn;
-			opcodes[0xE09E] = &low::cpu::op_Ex9E;
-			opcodes[0xE0A1] = &low::cpu::op_ExA1;
-			opcodes[0xF007] = &low::cpu::op_Fx07;
-			opcodes[0xF00A] = &low::cpu::op_Fx0A;
-			opcodes[0xF015] = &low::cpu::op_Fx15;
-			opcodes[0xF018] = &low::cpu::op_Fx18;
-			opcodes[0xF01E] = &low::cpu::op_Fx1E;
-			opcodes[0xF029] = &low::cpu::op_Fx29;
-			opcodes[0xF033] = &low::cpu::op_Fx33;
-			opcodes[0xF055] = &low::cpu::op_Fx55;
-			opcodes[0xF065] = &low::cpu::op_Fx65;
-
 			// Seed the random number generator
 			std::srand(static_cast<unsigned int>(std::time(nullptr)));
 		}
@@ -131,24 +116,35 @@ namespace low
 		void fetch_opcode()
 		{
 			opcode = memory[pc] << 8 | memory[pc + 1];
-			pc += 2;
 		}
 
 		void execute_opcode()
 		{
-			for (const auto &offset : { 0xF000, 0x000F, 0x00FF })
-			{
-				const uint16_t prefix = opcode & offset;
-				const auto found = opcodes.find(prefix);
 
-				if (found != opcodes.end())
-				{
-					(this->*found->second)();
-					return;
-				}
+			// Get the MSB and LSB of the opcode
+			uint8_t msb = (opcode >> 12) & 0xF;
+			uint8_t lsb = (opcode >> 8) & 0xF;
+
+			// Print the values of msb and lsb
+			if (msb != 0 || lsb != 0)
+			{
+#if DEBUG
+				std::cout << "opcode: " << std::hex << opcode
+						  << " msb: " << static_cast<int>(msb)
+						  << " lsb: " << static_cast<int>(lsb)
+						  << std::endl;
+#endif
 			}
 
-			spdlog::warn("unknown opcode! {}", opcode);
+			auto exec = opcodes[msb][lsb];
+
+			// Execute the opcode
+			if (exec != nullptr)
+			{
+				(this->*exec)();
+			}
+
+			pc += 2;
 		}
 
 		void tick_timer()
@@ -165,6 +161,11 @@ namespace low
 					std::cout << "sound thing" << std::endl;
 				}
 			}
+		}
+
+		uint8_t get_pixel_at(int x, int y)
+		{
+			return gfx[y * SIZE_X + x];
 		}
 
 	private:

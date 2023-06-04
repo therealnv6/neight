@@ -192,8 +192,12 @@ namespace low
 				if ((spriteByte & (0x80 >> col)) != 0)
 				{
 					unsigned int pixelIndex = xPos + col + ((yPos + row) * 64);
+
 					if (gfx[pixelIndex] == 1)
+					{
 						V[0xF] = 1;
+					}
+
 					gfx[pixelIndex] ^= 1;
 				}
 			}
@@ -235,7 +239,10 @@ namespace low
 		}
 
 		if (!keyPressed)
-			pc -= 2;
+		{
+			// todo: uncomment this, we don't have input yet
+			// pc -= 2;
+		}
 	}
 
 	void cpu::op_Fx15()
