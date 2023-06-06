@@ -22,6 +22,7 @@ namespace low
 	void cpu::op_2nnn()
 	{
 		uint16_t address = opcode & 0x0FFF;
+
 		stack[sp] = pc;
 		++sp;
 		pc = address;

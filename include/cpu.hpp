@@ -50,26 +50,6 @@ namespace low
 		uint16_t sp;
 		uint8_t key[16];
 
-		// std::map<uint16_t, callback> opcodes;
-		callback opcodes[16][16] = {
-			{&cpu::op_00E0,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x0...
-			{&cpu::op_1nnn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x1...
-			{&cpu::op_2nnn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x2...
-			{&cpu::op_3xkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x3...
-			{&cpu::op_4xkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x4...
-			{&cpu::op_5xy0,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x5...
-			{&cpu::op_6xkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x6...
-			{&cpu::op_7xkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x7...
-			{&cpu::op_8xy0, &cpu::op_8xy1, &cpu::op_8xy2, &cpu::op_8xy3, &cpu::op_8xy4, &cpu::op_8xy5, &cpu::op_8xy6, &cpu::op_8xy7, &cpu::op_8xyE,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x8...
-			{&cpu::op_9xy0,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0x9...
-			{&cpu::op_Annn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xA...
-			{&cpu::op_Bnnn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xB...
-			{&cpu::op_Cxkk,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xC...
-			{&cpu::op_Dxyn,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xD...
-			{&cpu::op_Ex9E,		 nullptr, &cpu::op_ExA1,		 nullptr,		  nullptr,	   nullptr,		nullptr,		 nullptr,		  nullptr,	   nullptr,		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}, // Opcode 0xE...
-			{&cpu::op_Fx07,		 nullptr, &cpu::op_Fx0A,		 nullptr, &cpu::op_Fx15, &cpu::op_Fx18, &cpu::op_Fx1E, &cpu::op_Fx29, &cpu::op_Fx33, &cpu::op_Fx55, &cpu::op_Fx65, nullptr, nullptr, nullptr, nullptr, nullptr}	 // Opcode 0xF...
-		};
-
 	public:
 		cpu()
 		{
@@ -116,35 +96,147 @@ namespace low
 		void fetch_opcode()
 		{
 			opcode = memory[pc] << 8 | memory[pc + 1];
+			pc += 2;
 		}
 
 		void execute_opcode()
 		{
-
 			// Get the MSB and LSB of the opcode
 			uint8_t msb = (opcode >> 12) & 0xF;
 			uint8_t lsb = (opcode >> 8) & 0xF;
 
-			// Print the values of msb and lsb
-			if (msb != 0 || lsb != 0)
+			// i want to clean this up with some kind of lookup table, but i just can't seem to get it to work right now. but this works. just kinda ugly.
+			switch (opcode & 0xF000)
 			{
-#if DEBUG
+			case 0x0000:
+				switch (opcode & 0x000F)
+				{
+				case 0x0000:
+					op_00E0();
+					break;
+				case 0x000E:
+					op_00EE();
+					break;
+				}
+				break;
+			case 0x1000:
+				op_1nnn();
+				break;
+			case 0x2000:
+				op_2nnn();
+				break;
+			case 0x3000:
+				op_3xkk();
+				break;
+			case 0x4000:
+				op_4xkk();
+				break;
+			case 0x5000:
+				op_5xy0();
+				break;
+			case 0x6000:
+				op_6xkk();
+				break;
+			case 0x7000:
+				op_7xkk();
+
+				break;
+			case 0x8000:
+				switch (opcode & 0x000F)
+				{
+				case 0x0000:
+					op_8xy0();
+					break;
+				case 0x0001:
+					op_8xy1();
+					break;
+				case 0x0002:
+					op_8xy2();
+					break;
+				case 0x0003:
+					op_8xy3();
+					break;
+				case 0x0004:
+					op_8xy4();
+					break;
+				case 0x0005:
+					op_8xy5();
+					break;
+				case 0x0006:
+					op_8xy6();
+					break;
+				case 0x0007:
+					op_8xy7();
+					break;
+				case 0x000E:
+					op_8xyE();
+					break;
+				}
+				break;
+			case 0x9000:
+				op_9xy0();
+				break;
+			case 0xA000:
+				op_Annn();
+				break;
+			case 0xB000:
+				op_Bnnn();
+				break;
+			case 0xC000:
+				op_Cxkk();
+				break;
+			case 0xD000:
+				op_Dxyn();
+				break;
+			case 0xE000:
+				switch (opcode & 0x00FF)
+				{
+				case 0x009E:
+					op_Ex9E();
+					break;
+				case 0x00A1:
+					op_ExA1();
+					break;
+				}
+				break;
+			case 0xF000:
+				switch (opcode & 0x00FF)
+				{
+				case 0x0007:
+					op_Fx07();
+					break;
+				case 0x000A:
+					op_Fx0A();
+					break;
+				case 0x0015:
+					op_Fx15();
+					break;
+				case 0x0018:
+					op_Fx18();
+					break;
+				case 0x001E:
+					op_Fx1E();
+					break;
+				case 0x0029:
+					op_Fx29();
+					break;
+				case 0x0033:
+					op_Fx33();
+					break;
+				case 0x0055:
+					op_Fx55();
+					break;
+				case 0x0065:
+					op_Fx65();
+					break;
+				}
+				break;
+			default:
 				std::cout << "opcode: " << std::hex << opcode
 						  << " msb: " << static_cast<int>(msb)
 						  << " lsb: " << static_cast<int>(lsb)
 						  << std::endl;
-#endif
 			}
-
-			auto exec = opcodes[msb][lsb];
-
-			// Execute the opcode
-			if (exec != nullptr)
-			{
-				(this->*exec)();
-			}
-
-			pc += 2;
 		}
 
 		void tick_timer()
@@ -158,7 +250,6 @@ namespace low
 			{
 				if (--sound_timer == 0)
 				{
-					std::cout << "sound thing" << std::endl;
 				}
 			}
 		}
